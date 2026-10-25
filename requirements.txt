@@ -1,0 +1,20 @@
+# Lightsheet pipeline - tested versions (Windows 11, Python 3.10).
+numpy==2.2.6
+scipy==1.15.3
+scikit-image==0.25.2
+PyWavelets==1.8.0
+zarr==2.18.3
+numcodecs==0.13.1
+dask==2026.8.0
+tifffile==2025.5.10
+imagecodecs==2025.3.30
+aicspylibczi==4.0.1
+pylibCZIrw==6.1.0
+pillow==12.3.0
+magicgui==0.10.2
+napari[all]==0.7.1
+
+# Optional GPU (deconvolution + TV denoise are ~30x faster). Install ONE of these AFTER the lines above, matching the
+# "CUDA Version" shown by `nvidia-smi` (13.x -> cuda13x, 12.x -> cuda12x), or run  setup_env.ps1 -Gpu cuda13
+#   cupy-cuda13x[ctk]==14.2.0
+#   cupy-cuda12x[ctk]

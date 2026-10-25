@@ -1,0 +1,9 @@
+__pycache__/
+*.pyc
+.venv/
+.cupy/
+*.ini
+run_gui_local.bat
+*.zarr/
+*.partial
+evaluation/results/*.npy
