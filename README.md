@@ -38,6 +38,7 @@ lsp/                  the library (project, convert, register, fuse, preprocess,
 tests/test_core.py    self-contained checks on synthetic data (python tests/test_core.py)
 evaluation/           scripts behind the numbers and figures in the guide (set LSP_WORK to a work folder)
 docs/                 Acquisition_Guide.md (getting the .czi off the microscope)
+AGENTS.md             context for AI agents: goals, state, lab workflow, open items
 docs/images/          figures used in the guides
 ```
 
