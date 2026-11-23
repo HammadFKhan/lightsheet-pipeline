@@ -310,16 +310,17 @@ what you think.
 
 ## 11. Hand-off to the processing pipeline
 
-The `.czi` goes straight into the pipeline: see [Lightsheet_Guide.md](../Lightsheet_Guide.md), step A (Inspect).
-Things that matter downstream:
+A `.czi` acquired with this guide works in the pipeline **out of the box**: open it in the GUI and run the steps in
+[Lightsheet_Guide.md](../Lightsheet_Guide.md), starting at step A (Inspect). No conversion or settings to enter by hand.
 
-- **Tiling must be bounding grid** with tiles numbered 0 … N−1.
-- **One time point** only.
-- **Overlap of 10 to 25 %.** More overlap gives the registration more shared tissue to match (the pipeline's example data used
-  ~20 %), at the cost of more tiles and a bigger file.
-- The pipeline reads the **voxel size, sheet thickness, NA and emission wavelength** from the `.czi` metadata, so leave those
-  settings as `rg5x` sets them.
+It works because `rg5x` and this guide already produce what the pipeline reads automatically:
 
+- **Tile layout** from bounding-grid tiling (tiles numbered 0 … N−1), with the overlap you set (10 to 25 %).
+- **Voxel size, sheet thickness, NA and emission wavelength** from the `.czi` metadata.
+- **Both channels** (Cam1 and Cam2) in one file, one time point.
+
+So the only rule is: **don't change those settings away from `rg5x`** (for example switching to a centered grid or
+saving separate files).
 ---
 
 ## Quick reference: `rg5x` settings
