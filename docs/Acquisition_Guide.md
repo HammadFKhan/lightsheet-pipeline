@@ -32,7 +32,7 @@ Written from a hands-on training session on the core facility's **ZEISS Lightshe
 - [ ] Your sample is cleared and equilibrated in refractive-index **matching solution, RI 1.51 to 1.52**.
 - [ ] You have enough matching solution to fill the chamber.
 - [ ] You have a **portable hard drive** with room for the data (data is saved there, then moved to the mouse's folder). ZEN shows the expected size next to **Start Experiment** before you start
-      (a 3 × 6-tile, 2,584-plane run was ~530 GB). Processing later needs another 1.5 to 2× that.
+      (a typical 18-tile, ~1,274-slice whole brain is **~100 GB**). Processing later needs another 1.5 to 2× that.
 - [ ] *Tip:* warm the chamber and matching solution up a little before use. This helps prevent precipitation.
 
 ---
@@ -229,7 +229,7 @@ In **Multidimensional Acquisition → Z-Stack**, use the **First/Last** tab:
    double the planes and the file size.
 3. Leave **Continuous Drive** ticked and **Light Sheet Z-Offset Correction** unticked.
 4. Focus to one end of the sample → **Set First**. Focus to the other end → **Set Last**.
-5. Check **Range** and **Slices** (Slices ≈ Range ÷ 7.32 µm; a whole brain is ~1,100 to 1,300 planes, ~8,000 to 9,300 µm).
+5. Check **Range** and **Slices** (Slices ≈ Range ÷ 7.32 µm; a whole brain is typically **~1,274 slices**, ~9,300 µm).
 
 ### 9.3 Tiling
 
