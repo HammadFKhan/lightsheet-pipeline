@@ -287,11 +287,18 @@ what you think.
 
 1. Plug in your **portable hard drive** and set it as the destination. Check the size estimate next to
    **Start Experiment** fits on it.
-2. In **Streaming and Separate Files**, leave every *Separate Files* box unticked so the whole run is saved as **one `.czi`**.
-3. Click **Start Experiment**. The top-left panel counts slices and tiles (e.g. *1054 of 1274 slices, 1 of 18 tiles*).
-4. When it finishes, move the data from the portable drive into **that mouse's folder** on lab storage.
+2. Name the file **`<MouseID>_<Recording>_<YYYYMMDD>.czi`**:
 
-<!-- TODO(confirm): file-naming convention (e.g. MMTC001_DIQB_20261123.czi = mouse ID _ ? _ date?). -->
+   | Part | Meaning | Examples |
+   |---|---|---|
+   | `MouseID` | the animal | `MMTC001` |
+   | `Recording` | how the brain was recorded / labelled before imaging | `DIQB` = DiI-coated probes + quad-base Neuropixels; `NP2` = Neuropixels 2.0 |
+   | `YYYYMMDD` | imaging date | `20261123` |
+
+   e.g. `MMTC001_DIQB_20261123.czi`.
+3. In **Streaming and Separate Files**, leave every *Separate Files* box unticked so the whole run is saved as **one `.czi`**.
+4. Click **Start Experiment**. The top-left panel counts slices and tiles (e.g. *1054 of 1274 slices, 1 of 18 tiles*).
+5. When it finishes, move the data from the portable drive into **that mouse's folder** on lab storage.
 
 ### Clean up
 
