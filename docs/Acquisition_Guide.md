@@ -31,7 +31,7 @@ Written from a hands-on training session on the core facility's **ZEISS Lightshe
 - [ ] Instrument time is booked (a whole brain takes hours: plan for setup + acquisition + cleanup).
 - [ ] Your sample is cleared and equilibrated in refractive-index **matching solution, RI 1.51 to 1.52**.
 - [ ] You have enough matching solution to fill the chamber.
-- [ ] There is room for the data. ZEN shows the expected size next to **Start Experiment** before you start
+- [ ] You have a **portable hard drive** with room for the data (data is saved there, then moved to the mouse's folder). ZEN shows the expected size next to **Start Experiment** before you start
       (a 3 × 6-tile, 2,584-plane run was ~530 GB). Processing later needs another 1.5 to 2× that.
 - [ ] *Tip:* warm the chamber and matching solution up a little before use. This helps prevent precipitation.
 
@@ -57,8 +57,8 @@ Written from a hands-on training session on the core facility's **ZEISS Lightshe
 ![Sample chamber for cleared samples](images/acquisition/02_sample_chamber.jpg)
 
 > [!WARNING]
-> **Always remove the beam-forming objectives before placing in the working objectives.**
-<!-- TODO(confirm): is "working objectives" the detection objective, or the objectives for the cleared-sample chamber? -->
+> **If someone else left different objectives in**, always remove the beam-forming objectives *before* putting in the
+> working objective (the **5×**). Usually the 5× set is already installed and there is nothing to swap.
 
 ---
 
@@ -204,33 +204,91 @@ The light sheet is aligned with the chamber full of **matching solution only, no
 
 ## 9. Fit the z-stack and tiles to your sample
 
-1. Click **Continuous** to see a live image.
-2. While adjusting, right-click the image and set the depth to **12 bit**.
-   <!-- TODO(confirm): is this the live/display bit depth? rg5x acquires at 16 bit (Acquisition Mode → Bit Depth). -->
-3. **Rotate the sample until both hemispheres look the same** (equal size and brightness on both sides).
-4. Laser power and exposure come from `rg5x`. Check them on a bright and a dim region in the live view; the histogram should not clip.
-5. **Z-Stack** (Multidimensional Acquisition → Z-Stack, *First/Last*):
-   move to the top of the sample → **Set First**; move to the bottom → **Set Last**. Leave the **interval at 7.32 µm**
-   (ZEN suggests 3.515 µm as "optimal"; halving the step doubles the planes and the file size).
-6. **Tiling**: choose **Bounding grid**, mark positions around the sample (**Add**), and check the tile count
-   (e.g. 3 × 6) covers the whole brain. Overlap: **10 %** in the training example.
+### 9.1 Live view and orientation
 
-![Z-stack (First/Last) and Tiling (Bounding grid) panels](images/acquisition/18_zstack_tiling_panel.jpg)
+1. Click **Continuous** to see a live image.
+2. Leave **Bit Depth at 16 bit** (the `rg5x` default; Acquisition Mode panel).
+3. **Rotate the sample until both hemispheres look the same** (equal size and brightness on both sides).
+4. Laser power and exposure come from `rg5x` (488 at 70 %, 561 at ~5 %, 29.97 ms). Check a bright and a dim region in the
+   live view: the histogram should not clip.
+
+### 9.2 Check the light-sheet calibration values
+
+Under the laser sliders in **Channels → Track1** there are **Left** and **Right** values. These are calibration values for the
+light sheet's y and x axes, and there is a separate pair for the left and the right side.
+
+- **Check them every time the system boots up.** The numbers themselves are arbitrary: they differ from session to session
+  (e.g. −2.95 / 4.20 one day, 0.34 / 0.62 another), so do not copy them from `rg5x` or from this guide.
+
+<!-- TODO(add): how to check / set these values (which tool or wizard, what "correct" looks like). -->
+
+### 9.3 Z-stack
+
+In **Multidimensional Acquisition → Z-Stack**, use the **First/Last** tab:
+
+1. Under **Keep**, select **Interval** (not *Slice*), so the step stays fixed while you change the range.
+2. Make sure **Interval = 7.320 µm**. ZEN shows an "Optimal" of 3.515 µm next to it: **ignore it**. Halving the step would
+   double the planes and the file size.
+3. Leave **Continuous Drive** ticked and **Light Sheet Z-Offset Correction** unticked.
+4. Focus to one end of the sample → **Set First**. Focus to the other end → **Set Last**.
+5. Check **Range** and **Slices** (Slices ≈ Range ÷ 7.32 µm; a whole brain is ~1,100 planes, ~8,000 µm).
+
+### 9.4 Tiling
+
+In **Multidimensional Acquisition → Tiling**:
+
+1. Choose the **Bounding grid** tab.
+2. Set **Overlap between 10 and 25 %** (10 % is the minimum; use more if the tissue edges are sparse or stitching has
+   struggled before) and tick **Bi-directional** (the stage zig-zags across the grid instead of returning to the
+   start of every row, which is faster).
+3. Drive the stage to the outer edges of the sample (left, right, front, back) in the live view and press **Add** at each one.
+   The marked points appear in the minimap and in **Marked positions**. **Remove** / **Remove all** clear them.
+4. ZEN fits the smallest grid of tiles that contains every marked point and shows the result. Check it covers the whole
+   brain with some margin. Typical whole brains are **3 × 6 to 3 × 8 tiles**.
+5. Optional: **Save…** the marked positions so you can **Load…** them for the next sample.
+
+![Z-stack (First/Last, Keep: Interval, 7.320 µm) and Tiling (Bounding grid, 3 × 8 tiles, 10 % overlap)](images/acquisition/18_zstack_tiling_panel.jpg)
+
+**Sanity check of the numbers ZEN shows.** Each tile is 1920 × 1200 px at 2.54 µm. Each shared edge loses overlap × tile size,
+e.g. at 10 %: 192 px (x) / 120 px (y). So for 3 × 8 tiles at 10 % (the screenshot above):
+
+| | Tiles | Pixels | Size |
+|---|---|---|---|
+| Horizontal | 3 | 3 × 1920 − 2 × 192 = **5376** | 13,662 µm |
+| Vertical | 8 | 8 × 1200 − 7 × 120 = **8760** | 22,262 µm |
+
+If ZEN's pixel numbers don't match this, the overlap or frame size isn't what you think.
 
 > [!NOTE]
 > Keep **Bounding grid** tiling. The processing pipeline expects ZEN's bounding-grid tile numbering (0 … N−1).
+
+<!-- TODO(confirm): how the edges are marked in practice (live view at which zoom? one point per corner?). -->
+
+### 9.5 Pre-flight checklist
+
+- [ ] `rg5x` loaded; 488 + 561 on, Cam1 + Cam2 ticked
+- [ ] 16 bit
+- [ ] Left / Right calibration values checked this session
+- [ ] Z interval **7.320 µm**, Keep: Interval, First and Last set
+- [ ] Bounding grid, 10–25 % overlap, bi-directional, grid covers the sample
+- [ ] Size estimate fits on the portable hard drive
 
 ---
 
 ## 10. Acquire
 
-1. Check the size estimate next to **Start Experiment** against your free disk space.
-2. Set the destination folder and file name. Save as one `.czi` (not split into separate files).
-   <!-- TODO(confirm): lab convention for destination drive, file naming, and "Streaming and Separate Files" setting. -->
-3. Click **Start Experiment**.
+1. Plug in your **portable hard drive** and set it as the destination. Check the size estimate next to
+   **Start Experiment** fits on it.
+2. Click **Start Experiment**.
+3. When it finishes, move the data from the portable drive into **that mouse's folder** on lab storage.
 
-<!-- TODO(add): end-of-session steps (remove sample, clean/rinse chamber and objectives, store objectives, shut-down order,
-     copying data off the PC). -->
+<!-- TODO(confirm): file-naming convention, and whether "Streaming and Separate Files" should be on or off. -->
+
+### Clean up
+
+1. Remove the sample and the chamber in the **reverse order** you loaded them.
+2. Rinse the chamber under **warm water for about a minute** and leave it to dry.
+3. **Exit ZEN** and turn off the system.
 
 ---
 
@@ -241,7 +299,8 @@ Things that matter downstream:
 
 - **Tiling must be bounding grid** with tiles numbered 0 … N−1.
 - **One time point** only.
-- More **overlap** makes stitching more robust. 10 % works; the pipeline's example data used ~20 %.
+- **Overlap of 10 to 25 %.** More overlap gives the registration more shared tissue to match (the pipeline's example data used
+  ~20 %), at the cost of more tiles and a bigger file.
 - The pipeline reads the **voxel size, sheet thickness, NA and emission wavelength** from the `.czi` metadata, so leave those
   settings as `rg5x` sets them.
 
@@ -267,16 +326,18 @@ Things that matter downstream:
 | Acquisition Area | Frame | 1920 × 1200 px, 4876.7 × 3047.0 µm |
 | | Pixel size | 2.54 µm |
 | Channels | 488 power | 70.0 % |
-| | 561 power | 6.5 % |
+| | 561 power | ~5 % |
 | | Exposure (Cam1, Cam2) | 29.97 ms |
 | | Camera temperature | 5.0 °C |
-| Z-Stack | Interval | 7.32 µm |
+| Z-Stack | Interval | **7.320 µm** |
 | Specimen Navigator | Specimen diameter | 1200 µm |
 | | Refractive index | 1.520 |
-| Tiling | Mode, overlap | Bounding grid, 10 % |
+| Z-Stack | Keep | Interval |
+| Tiling | Mode | Bounding grid, bi-directional |
+| | Overlap | 10–25 % |
 
-<!-- TODO(confirm): the Left/Right values under the laser sliders (seen as -2.95/4.20 and 0.34/0.62): what they are and whether
-     they are part of rg5x or adjusted per sample. Also confirm 561 = 6.5 % and the overlap stored in rg5x. -->
+Not in the table on purpose: the **Left / Right** calibration values (check them every session, [9.2](#92-check-the-light-sheet-calibration-values)),
+and the z-range and tile grid (set for each sample).
 
 ---
 
@@ -288,4 +349,4 @@ Things that matter downstream:
 | Wrong objective shown in ZEN | Maintain → Objectives → objective icon → pick the installed one ([step 5](#5-verify-the-hardware-maintain-tab)). |
 | Precipitate / haze in the chamber | Warm the chamber and matching solution slightly before use. |
 | One hemisphere brighter or larger | Adjust the rotation until both sides match ([step 9](#9-fit-the-z-stack-and-tiles-to-your-sample)). |
-| Stitching fails later in the pipeline | Check tiling was **bounding grid** and overlap was at least 10 %. |
+| Stitching fails later in the pipeline | Check tiling was **bounding grid** and overlap was 10 to 25 %. |
