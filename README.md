@@ -4,6 +4,7 @@ Turn a huge tiled light-sheet `.czi` (ZEISS Lightsheet Z.1, tested on a 182 GB, 
 stitched, zoomable 3-D volume, with a GUI for every step. Python + [napari](https://napari.org); no coding needed.
 
 **Start here: [Lightsheet_Guide.md](Lightsheet_Guide.md)** (step-by-step, with pictures).
+Need to acquire the data first? See **[docs/Acquisition_Guide.md](docs/Acquisition_Guide.md)** (ZEISS Lightsheet 7, ZEN 3.1 black, lab preset `rg5x`).
 
 ![Stitched preview of a whole brain](docs/images/fig_stitched_plane.jpg)
 
@@ -36,7 +37,8 @@ Lightsheet_Guide.md   the user guide
 lsp/                  the library (project, convert, register, fuse, preprocess, denoise, export, GUI)
 tests/test_core.py    self-contained checks on synthetic data (python tests/test_core.py)
 evaluation/           scripts behind the numbers and figures in the guide (set LSP_WORK to a work folder)
-docs/images/          figures used in the guide
+docs/                 Acquisition_Guide.md (getting the .czi off the microscope)
+docs/images/          figures used in the guides
 ```
 
 Headless use (no GUI): `python -m lsp.cli all --czi FILE --work DIR` (steps: inspect, convert, register, preview, full).

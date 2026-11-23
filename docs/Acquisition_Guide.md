@@ -1,0 +1,291 @@
+# Acquisition Guide: getting a light-sheet stack off the ZEISS Lightsheet 7
+
+How to go from a cleared sample to a tiled `.czi` file that the [processing pipeline](../Lightsheet_Guide.md) can read.
+Written from a hands-on training session on the core facility's **ZEISS Lightsheet 7** running **ZEN 3.1 (black edition)**.
+
+> [!TIP]
+> **The short version.** Our lab keeps a saved experiment called **`rg5x`** that preloads every acquisition setting
+> (lasers, light path, light sheet, camera, pixel size, z-step). Most of a session is hardware setup and checks; once the
+> sample is in, you load `rg5x`, set the z-range and tiles around your sample, and start.
+
+**Contents**
+[0. Before you go](#0-before-you-go) ·
+[1. Prepare the optics and chamber](#1-prepare-the-optics-and-chamber) ·
+[2. Check the laser blocking filter](#2-check-the-laser-blocking-filter) ·
+[3. Power on](#3-power-on) ·
+[4. Start ZEN](#4-start-zen) ·
+[5. Verify the hardware](#5-verify-the-hardware-maintain-tab) ·
+[6. Align the light sheet](#6-align-the-light-sheet-adjust-light-sheet-wizard) ·
+[7. Load the sample](#7-load-the-sample) ·
+[8. Load `rg5x`](#8-load-the-lab-settings-rg5x) ·
+[9. Fit the stack to your sample](#9-fit-the-z-stack-and-tiles-to-your-sample) ·
+[10. Acquire](#10-acquire) ·
+[11. Hand-off to the pipeline](#11-hand-off-to-the-processing-pipeline) ·
+[Quick reference](#quick-reference-rg5x-settings) ·
+[Troubleshooting](#troubleshooting)
+
+---
+
+## 0. Before you go
+
+- [ ] Instrument time is booked (a whole brain takes hours: plan for setup + acquisition + cleanup).
+- [ ] Your sample is cleared and equilibrated in refractive-index **matching solution, RI 1.51 to 1.52**.
+- [ ] You have enough matching solution to fill the chamber.
+- [ ] There is room for the data. ZEN shows the expected size next to **Start Experiment** before you start
+      (a 3 × 6-tile, 2,584-plane run was ~530 GB). Processing later needs another 1.5 to 2× that.
+- [ ] *Tip:* warm the chamber and matching solution up a little before use. This helps prevent precipitation.
+
+---
+
+## 1. Prepare the optics and chamber
+
+**Objectives used for cleared brains**
+
+| Role | Objective | Shown in ZEN as |
+|---|---|---|
+| Detection | 5× / 0.16, RI-adjustable | `EC Plan-Neofluar 5x/0.16 foc` |
+| Illumination (beam-forming, left and right) | 5× / 0.1 | `LSFM 5x/0.1 foc` |
+
+- The 5× beam-forming (illumination) objectives go with the 2×, 5× and 10× objectives for **clearing / matching solution**.
+- The illumination objectives have **coloured RI rings** (scale 1.40 to 1.55). Set them to match the clearing solution: **1.52**.
+  Set the detection objective's correction collar to the same value.
+
+![Detection objective (centre) and the two illumination objectives with their RI rings](images/acquisition/01_chamber_objectives.jpg)
+
+- Use the **sample chamber for cleared samples** (below).
+
+![Sample chamber for cleared samples](images/acquisition/02_sample_chamber.jpg)
+
+> [!WARNING]
+> **Always remove the beam-forming objectives before placing in the working objectives.**
+<!-- TODO(confirm): is "working objectives" the detection objective, or the objectives for the cleared-sample chamber? -->
+
+---
+
+## 2. Check the laser blocking filter
+
+You rarely need to touch this, but you should know where it is.
+
+1. Open the hatch on the side of the stand.
+2. Turn the **comma-shaped knob** to loosen it, then pull the handle to slide out the laser blocking filter wheel.
+
+![Access hatch for the laser blocking filter wheel; the comma-shaped knob is lower right](images/acquisition/03_filter_hatch.jpg)
+
+| ![Laser blocking filter wheel](images/acquisition/04_filter_wheel.jpg) | ![Filter cube label: LBF 405/488/561/640](images/acquisition/05_filter_label.jpg) |
+|---|---|
+
+The wheel positions as configured in ZEN (see [step 5](#5-verify-the-hardware-maintain-tab)):
+
+| Position | Filter |
+|---|---|
+| 1 | Plate |
+| 2 | LBF 445/514/561 |
+| 3 | **LBF 405/488/561/640** ← used for 488 + 561 imaging |
+| 4 | NoneLSM |
+| 5 | None |
+| 6 | ND 4 (RGB) |
+
+---
+
+## 3. Power on
+
+1. On the switch box, turn on **SYSTEM** and **PC** (the top two switches). Leave **INCUBATION** off; cleared samples do not need it.
+2. Also press the PC's own **power button** on the tower.
+
+![Switch box: SYSTEM, PC, INCUBATION](images/acquisition/06_power_switches.jpg)
+
+---
+
+## 4. Start ZEN
+
+1. Before starting the software, check that the **offset controller** is set to **DEFAULT**. It resets to DEFAULT after every
+   restart, so this is usually already fine.
+2. Open **ZEN 3.1 (black edition)**. Do **not** use ZEN blue on this computer.
+3. In the login window, under **Hardware configuration database**, click **Choose…** and select the Lightsheet 7 database:
+   `C:\ZEN\database\New folder\Lightsheet_7_2583000217.mdb`.
+   Do **not** choose the *Clearing Objective* database: the filter wheel is installed, so the standard database is correct.
+
+| ![ZEN login: hardware configuration database](images/acquisition/07_zen_login.jpg) | ![Choosing the database in New folder](images/acquisition/08_database_folder.jpg) |
+|---|---|
+
+4. Click **Start System**.
+5. If you changed the database, a pop-up says the **attenuation is incorrect** and asks whether to proceed: click **Yes**.
+6. A second pop-up says the **motorized stage will now configure**.
+
+> [!CAUTION]
+> Make sure there is **no sample in the chamber** before you confirm the stage configuration. The stage moves on its own.
+
+---
+
+## 5. Verify the hardware (Maintain tab)
+
+Open the **Maintain** tab → **Objectives**.
+
+1. **Detection Optic** should read `EC Plan-Neofluar 5x/0.16 foc`.
+2. **Illumination Optic** should read `LSFM 5x/0.1 foc`.
+3. If either is wrong, click the **objective icon** → **Change Objective** and pick the objective that is physically installed.
+   The 5× is standard.
+
+| ![Detection optic check](images/acquisition/09_detection_objective.jpg) | ![Change Objective list](images/acquisition/10_change_objective.jpg) |
+|---|---|
+
+4. Open **Filters** → **Laser Blocking Filter** and check the order matches the wheel ([table in step 2](#2-check-the-laser-blocking-filter)).
+   Mismatches are very rare, but the check is quick.
+
+![Illumination optic and laser blocking filter list](images/acquisition/11_illumination_and_filters.jpg)
+
+---
+
+## 6. Align the light sheet (Adjust Light Sheet wizard)
+
+The light sheet is aligned with the chamber full of **matching solution only, no sample**.
+
+1. Fill the cleared-sample chamber with matching solution and mount it in the microscope.
+
+   ![Chamber mounted in the microscope](images/acquisition/14_chamber_mounted.jpg)
+
+2. In **Maintain** → **Options** → **Adjustment**, click **Adjust Light Sheet**.
+3. The wizard's first page is a checklist. Confirm each item, then tick **Verified**:
+   - sample chamber is mounted correctly,
+   - the chamber is filled with the correct medium,
+   - the sample is **not** in front of the detection objective,
+   - the detection objective's focus ring / correction collar is set to the correct RI,
+   - the illumination objectives' focus rings are set to the correct RI.
+
+   ![Adjust Light Sheet checklist](images/acquisition/12_wizard_checklist.jpg)
+
+4. Select **one laser line: 488**, and set the **refractive index to 1.52**.
+
+   > [!IMPORTANT]
+   > The refractive index box may default to **1.560**. Change it to **1.52**.
+
+   ![Laser line and refractive index selection](images/acquisition/13_wizard_laser_ri.jpg)
+
+5. Follow the rest of the wizard so the laser is correctly aligned through the chamber.
+
+---
+
+## 7. Load the sample
+
+1. Mount the specimen in the holder and lower it into the chamber.
+
+   ![Specimen holder in the chamber (top view)](images/acquisition/15_sample_loaded_top.jpg)
+
+2. In the **Locate** tab, use the **overview camera** and the **specimen locator** to bring the sample into view.
+3. In **Specimen Navigator**, set:
+   - **Specimen diameter: 1200 µm** (a larger preview cylinder, so a whole brain fits),
+   - **Refractive index: 1.520**.
+
+---
+
+## 8. Load the lab settings (`rg5x`)
+
+1. Go to the **Acquisition** tab.
+2. In **Experiment Manager**, click the **folder icon** and load **`rg5x`**. Every setting below is now in place.
+   - *Fallback:* if `rg5x` is missing, load an existing image acquired with the right settings and press **Reuse** in the
+     image view. ZEN copies that image's settings.
+3. Work through the panels **top to bottom** and check each one against the [quick reference](#quick-reference-rg5x-settings).
+   You should not need to change anything except the z-range and tiles.
+
+![rg5x loaded in ZEN (live test with 488 only, Cam1)](images/acquisition/17_rg5x_settings.jpg)
+
+**What `rg5x` sets up, and why**
+
+- **One track, two cameras.** 488 nm and 561 nm fire together; a 560 nm dichroic (**SBS LP 560**) splits the emission onto
+  **Cam1 (BP 505–545, green)** and **Cam2 (LP 585, red)**. Both channels are captured at once, so there is no
+  track switching.
+- **Single-side illumination from the left**, sheet thickness **7.32 µm**, **pivot scan on** (reduces shadow stripes).
+- **Zoom 0.36 → 2.54 µm pixels**, 1920 × 1200 px frame (4876.7 × 3047.0 µm field of view).
+- **Z-step 7.32 µm** (equal to the sheet thickness).
+
+![rg5x with both channels (488 + 561, Cam1 + Cam2)](images/acquisition/19_rg5x_two_channel.jpg)
+
+---
+
+## 9. Fit the z-stack and tiles to your sample
+
+1. Click **Continuous** to see a live image.
+2. While adjusting, right-click the image and set the depth to **12 bit**.
+   <!-- TODO(confirm): is this the live/display bit depth? rg5x acquires at 16 bit (Acquisition Mode → Bit Depth). -->
+3. **Rotate the sample until both hemispheres look the same** (equal size and brightness on both sides).
+4. Laser power and exposure come from `rg5x`. Check them on a bright and a dim region in the live view; the histogram should not clip.
+5. **Z-Stack** (Multidimensional Acquisition → Z-Stack, *First/Last*):
+   move to the top of the sample → **Set First**; move to the bottom → **Set Last**. Leave the **interval at 7.32 µm**
+   (ZEN suggests 3.515 µm as "optimal"; halving the step doubles the planes and the file size).
+6. **Tiling**: choose **Bounding grid**, mark positions around the sample (**Add**), and check the tile count
+   (e.g. 3 × 6) covers the whole brain. Overlap: **10 %** in the training example.
+
+![Z-stack (First/Last) and Tiling (Bounding grid) panels](images/acquisition/18_zstack_tiling_panel.jpg)
+
+> [!NOTE]
+> Keep **Bounding grid** tiling. The processing pipeline expects ZEN's bounding-grid tile numbering (0 … N−1).
+
+---
+
+## 10. Acquire
+
+1. Check the size estimate next to **Start Experiment** against your free disk space.
+2. Set the destination folder and file name. Save as one `.czi` (not split into separate files).
+   <!-- TODO(confirm): lab convention for destination drive, file naming, and "Streaming and Separate Files" setting. -->
+3. Click **Start Experiment**.
+
+<!-- TODO(add): end-of-session steps (remove sample, clean/rinse chamber and objectives, store objectives, shut-down order,
+     copying data off the PC). -->
+
+---
+
+## 11. Hand-off to the processing pipeline
+
+The `.czi` goes straight into the pipeline: see [Lightsheet_Guide.md](../Lightsheet_Guide.md), step A (Inspect).
+Things that matter downstream:
+
+- **Tiling must be bounding grid** with tiles numbered 0 … N−1.
+- **One time point** only.
+- More **overlap** makes stitching more robust. 10 % works; the pipeline's example data used ~20 %.
+- The pipeline reads the **voxel size, sheet thickness, NA and emission wavelength** from the `.czi` metadata, so leave those
+  settings as `rg5x` sets them.
+
+---
+
+## Quick reference: `rg5x` settings
+
+| Panel | Setting | Value |
+|---|---|---|
+| Laser | Lasers on | **488 nm** (Laser 488-30) and **561 nm** (Laser 561-20) |
+| Light Path | Tracks | 1 track (Track1), both lasers together |
+| | Laser blocking filter | LBF 405/488/561/640 |
+| | Beam splitter | SBS LP 560 |
+| | Cam1 emission filter | BP 505–545 (488 channel) |
+| | Cam2 emission filter | LP 585 (561 channel) |
+| | Detection objective | EC Plan-Neofluar 5x/0.16 foc |
+| Acquisition Mode | Bit depth | 16 bit |
+| | Zoom | 0.36 |
+| | Light sheet | Single side, direction **Left** |
+| | Thickness | 7.32 µm |
+| | Pivot scan | On |
+| | Online dual side fusion | Off |
+| Acquisition Area | Frame | 1920 × 1200 px, 4876.7 × 3047.0 µm |
+| | Pixel size | 2.54 µm |
+| Channels | 488 power | 70.0 % |
+| | 561 power | 6.5 % |
+| | Exposure (Cam1, Cam2) | 29.97 ms |
+| | Camera temperature | 5.0 °C |
+| Z-Stack | Interval | 7.32 µm |
+| Specimen Navigator | Specimen diameter | 1200 µm |
+| | Refractive index | 1.520 |
+| Tiling | Mode, overlap | Bounding grid, 10 % |
+
+<!-- TODO(confirm): the Left/Right values under the laser sliders (seen as -2.95/4.20 and 0.34/0.62): what they are and whether
+     they are part of rg5x or adjusted per sample. Also confirm 561 = 6.5 % and the overlap stored in rg5x. -->
+
+---
+
+## Troubleshooting
+
+| Symptom | Fix |
+|---|---|
+| "Attenuation is incorrect" pop-up at start | Expected after changing the database: click **Yes**. |
+| Wrong objective shown in ZEN | Maintain → Objectives → objective icon → pick the installed one ([step 5](#5-verify-the-hardware-maintain-tab)). |
+| Precipitate / haze in the chamber | Warm the chamber and matching solution slightly before use. |
+| One hemisphere brighter or larger | Adjust the rotation until both sides match ([step 9](#9-fit-the-z-stack-and-tiles-to-your-sample)). |
+| Stitching fails later in the pipeline | Check tiling was **bounding grid** and overlap was at least 10 %. |
