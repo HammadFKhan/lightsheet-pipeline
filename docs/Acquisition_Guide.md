@@ -28,7 +28,7 @@ Written from a hands-on training session on the core facility's **ZEISS Lightshe
 
 ## 0. Before you go
 
-- [ ] Instrument time is booked (a whole brain takes hours: plan for setup + acquisition + cleanup).
+- [ ] Instrument time is booked: setup and calibration, plus **~35 min** of acquisition for a typical 18-tile brain, plus cleanup.
 - [ ] Your sample is cleared and equilibrated in refractive-index **matching solution, RI 1.51 to 1.52**.
 - [ ] You have enough matching solution to fill the chamber.
 - [ ] You have a **portable hard drive** with room for the data (data is saved there, then moved to the mouse's folder). ZEN shows the expected size next to **Start Experiment** before you start
@@ -138,7 +138,8 @@ Open the **Maintain** tab → **Objectives**.
 
 ## 6. Align the light sheet (Adjust Light Sheet wizard)
 
-The light sheet is aligned with the chamber full of **matching solution only, no sample**.
+This is also the **light-sheet calibration**. Do it **every time the system boots up**. The light sheet is aligned with the
+chamber full of **matching solution only, no sample**.
 
 1. Fill the cleared-sample chamber with matching solution and mount it in the microscope.
 
@@ -161,7 +162,14 @@ The light sheet is aligned with the chamber full of **matching solution only, no
 
    ![Laser line and refractive index selection](images/acquisition/13_wizard_laser_ri.jpg)
 
-5. Follow the rest of the wizard so the laser is correctly aligned through the chamber.
+5. Follow the rest of the wizard. For each side (left and right), adjust the **x and y axis values** until the light sheet
+   shows as a **thin, high-intensity band of light near the crosshairs** of the calibration view.
+   - A wide, dim or off-centre band means the values need more adjustment.
+   - The resulting numbers are arbitrary and change from session to session (they appear as **Left / Right** under the laser
+     sliders in the Acquisition tab, e.g. −2.95 / 4.20 one day, 0.34 / 0.62 another). **Never copy them** from `rg5x`,
+     from another user or from this guide: always calibrate.
+
+   <!-- TODO(add): picture of a good vs a bad calibration band. -->
 
 ---
 
@@ -212,17 +220,7 @@ The light sheet is aligned with the chamber full of **matching solution only, no
 4. Laser power and exposure come from `rg5x` (488 at 70 %, 561 at ~5 %, 29.97 ms). Check a bright and a dim region in the
    live view: the histogram should not clip.
 
-### 9.2 Check the light-sheet calibration values
-
-Under the laser sliders in **Channels → Track1** there are **Left** and **Right** values. These are calibration values for the
-light sheet's y and x axes, and there is a separate pair for the left and the right side.
-
-- **Check them every time the system boots up.** The numbers themselves are arbitrary: they differ from session to session
-  (e.g. −2.95 / 4.20 one day, 0.34 / 0.62 another), so do not copy them from `rg5x` or from this guide.
-
-<!-- TODO(add): how to check / set these values (which tool or wizard, what "correct" looks like). -->
-
-### 9.3 Z-stack
+### 9.2 Z-stack
 
 In **Multidimensional Acquisition → Z-Stack**, use the **First/Last** tab:
 
@@ -231,46 +229,56 @@ In **Multidimensional Acquisition → Z-Stack**, use the **First/Last** tab:
    double the planes and the file size.
 3. Leave **Continuous Drive** ticked and **Light Sheet Z-Offset Correction** unticked.
 4. Focus to one end of the sample → **Set First**. Focus to the other end → **Set Last**.
-5. Check **Range** and **Slices** (Slices ≈ Range ÷ 7.32 µm; a whole brain is ~1,100 planes, ~8,000 µm).
+5. Check **Range** and **Slices** (Slices ≈ Range ÷ 7.32 µm; a whole brain is ~1,100 to 1,300 planes, ~8,000 to 9,300 µm).
 
-### 9.4 Tiling
+### 9.3 Tiling
+
+**Goal: a 3 × 6 grid (18 tiles), which takes about 35 minutes.** You mark **4 points** and ZEN tiles the rest.
 
 In **Multidimensional Acquisition → Tiling**:
 
 1. Choose the **Bounding grid** tab.
-2. Set **Overlap between 10 and 25 %** (10 % is the minimum; use more if the tissue edges are sparse or stitching has
-   struggled before) and tick **Bi-directional** (the stage zig-zags across the grid instead of returning to the
-   start of every row, which is faster).
-3. Drive the stage to the outer edges of the sample (left, right, front, back) in the live view and press **Add** at each one.
-   The marked points appear in the minimap and in **Marked positions**. **Remove** / **Remove all** clear them.
-4. ZEN fits the smallest grid of tiles that contains every marked point and shows the result. Check it covers the whole
-   brain with some margin. Typical whole brains are **3 × 6 to 3 × 8 tiles**.
-5. Optional: **Save…** the marked positions so you can **Load…** them for the next sample.
+2. Set **Overlap between 10 and 25 %** (our recent runs use **25 %**; more overlap gives the stitching more to work with).
+3. Mark the brain's extent with **Add**, 4 points in total:
 
-![Z-stack (First/Last, Keep: Interval, 7.320 µm) and Tiling (Bounding grid, 3 × 8 tiles, 10 % overlap)](images/acquisition/18_zstack_tiling_panel.jpg)
+   | Point | Where |
+   |---|---|
+   | 1 | **Anterior** tip of the brain |
+   | 2 | **Posterior** end of the brain |
+   | 3 | **Left** edge, where the brain is **widest** |
+   | 4 | **Right** edge, where the brain is **widest** |
 
-**Sanity check of the numbers ZEN shows.** Each tile is 1920 × 1200 px at 2.54 µm. Each shared edge loses overlap × tile size,
-e.g. at 10 %: 192 px (x) / 120 px (y). So for 3 × 8 tiles at 10 % (the screenshot above):
+   The points appear in the minimap and under **Marked positions**. **Remove** / **Remove all** clear them.
+4. Leave **Bi-directional** unticked (as in our recent runs).
+5. ZEN fits the smallest grid of tiles that contains all four points. Check it reads **3 × 6** (or close) and that the grid
+   covers the whole brain. The list of tiles appears under **Tile positions**.
+6. Optional: **Save…** the marked positions so you can **Load…** them for the next sample.
+
+![A real rg5x run: 3 × 6 = 18 tiles, 25 % overlap, 1274 slices at 7.320 µm](images/acquisition/20_rg5x_18_tile_run.jpg)
+
+**Sanity check of the numbers ZEN shows.** Each tile is 1920 × 1200 px at 2.54 µm, and every shared edge loses
+*overlap × tile size*. For the 3 × 6 run above at 25 % (480 px in x, 300 px in y per edge):
 
 | | Tiles | Pixels | Size |
 |---|---|---|---|
-| Horizontal | 3 | 3 × 1920 − 2 × 192 = **5376** | 13,662 µm |
-| Vertical | 8 | 8 × 1200 − 7 × 120 = **8760** | 22,262 µm |
+| Horizontal | 3 | 3 × 1920 − 2 × 480 = **4800** | 12,198 µm |
+| Vertical | 6 | 6 × 1200 − 5 × 300 = **5700** | 14,485 µm |
 
-If ZEN's pixel numbers don't match this, the overlap or frame size isn't what you think.
+At 10 % the same 3 × 6 grid would be 5376 × 6720 px. If ZEN's pixel numbers don't match, the overlap or frame size isn't
+what you think.
+
+![Z-stack and Tiling panels close up (here a 3 × 8 grid at 10 %)](images/acquisition/18_zstack_tiling_panel.jpg)
 
 > [!NOTE]
 > Keep **Bounding grid** tiling. The processing pipeline expects ZEN's bounding-grid tile numbering (0 … N−1).
 
-<!-- TODO(confirm): how the edges are marked in practice (live view at which zoom? one point per corner?). -->
-
-### 9.5 Pre-flight checklist
+### 9.4 Pre-flight checklist
 
 - [ ] `rg5x` loaded; 488 + 561 on, Cam1 + Cam2 ticked
 - [ ] 16 bit
-- [ ] Left / Right calibration values checked this session
+- [ ] Light sheet calibrated this session ([step 6](#6-align-the-light-sheet-adjust-light-sheet-wizard))
 - [ ] Z interval **7.320 µm**, Keep: Interval, First and Last set
-- [ ] Bounding grid, 10–25 % overlap, bi-directional, grid covers the sample
+- [ ] Bounding grid from 4 marked points, 10–25 % overlap, ~3 × 6 tiles covering the brain
 - [ ] Size estimate fits on the portable hard drive
 
 ---
@@ -279,10 +287,11 @@ If ZEN's pixel numbers don't match this, the overlap or frame size isn't what yo
 
 1. Plug in your **portable hard drive** and set it as the destination. Check the size estimate next to
    **Start Experiment** fits on it.
-2. Click **Start Experiment**.
-3. When it finishes, move the data from the portable drive into **that mouse's folder** on lab storage.
+2. In **Streaming and Separate Files**, leave every *Separate Files* box unticked so the whole run is saved as **one `.czi`**.
+3. Click **Start Experiment**. The top-left panel counts slices and tiles (e.g. *1054 of 1274 slices, 1 of 18 tiles*).
+4. When it finishes, move the data from the portable drive into **that mouse's folder** on lab storage.
 
-<!-- TODO(confirm): file-naming convention, and whether "Streaming and Separate Files" should be on or off. -->
+<!-- TODO(confirm): file-naming convention (e.g. MMTC001_DIQB_20261123.czi = mouse ID _ ? _ date?). -->
 
 ### Clean up
 
@@ -333,10 +342,12 @@ Things that matter downstream:
 | Specimen Navigator | Specimen diameter | 1200 µm |
 | | Refractive index | 1.520 |
 | Z-Stack | Keep | Interval |
-| Tiling | Mode | Bounding grid, bi-directional |
-| | Overlap | 10–25 % |
+| Tiling | Mode | Bounding grid |
+| | Bi-directional | Off (as in recent runs) |
+| | Overlap | 10–25 % (recent runs: 25 %) |
+| | Typical grid | 3 × 6 = 18 tiles, ~35 min |
 
-Not in the table on purpose: the **Left / Right** calibration values (check them every session, [9.2](#92-check-the-light-sheet-calibration-values)),
+Not in the table on purpose: the **Left / Right** calibration values (set by calibrating every session, [step 6](#6-align-the-light-sheet-adjust-light-sheet-wizard)),
 and the z-range and tile grid (set for each sample).
 
 ---
